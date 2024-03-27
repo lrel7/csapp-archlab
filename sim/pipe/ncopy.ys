@@ -43,32 +43,18 @@ iaddq $1, %rax          # count++
 Loop4:	
 mrmovq 24(%rdi), %r10	# read val from src...
 rmmovq %r10, 24(%rsi)	# ...and store it to dst
+iaddq $32, %rdi
+iaddq $32, %rsi
 andq %r10, %r10		    # val <= 0?
-jle Loop5		        # if so, goto next loop
-iaddq $1, %rax          # count++
-
-Loop5:	
-mrmovq 32(%rdi), %r10	# read val from src...
-rmmovq %r10, 32(%rsi)	# ...and store it to dst
-andq %r10, %r10		    # val <= 0?
-jle Loop6		        # if so, goto next loop
-iaddq $1, %rax          # count++
-
-Loop6:	
-mrmovq 40(%rdi), %r10	# read val from src...
-rmmovq %r10, 40(%rsi)	# ...and store it to dst
-iaddq $48, %rdi         # increment src
-iaddq $48, %rsi         # increment dst
-andq %r10, %r10		    # val <= 0?
-jle Test_Unrolling      # if so, goto next Test_Unrolling
+jle Test_Unrolling		# if so, goto next Test_Unrolling
 iaddq $1, %rax          # count++
 
 Test_Unrolling:
-iaddq $-6, %rdx         # len >= 6?
+iaddq $-4, %rdx         # len >= 4?
 jge Loop1
 
 # Deal with remain data
-iaddq $6, %rdx          # add back %rdx
+iaddq $4, %rdx          # add back %rdx
 jle Done                # if len <= 0, goto Done
 
 Remain_Loop:

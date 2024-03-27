@@ -2,12 +2,12 @@
                             | # Test for copying block of size 63;
                             | #######################################################################
 0x000:                      | 	.pos 0
-0x000: 30f45806000000000000 | main:	irmovq Stack, %rsp  	# Set up stack pointer
+0x000: 30f40806000000000000 | main:	irmovq Stack, %rsp  	# Set up stack pointer
                             | 
                             | 	# Set up arguments for copy function and then invoke it
 0x00a: 30f23f00000000000000 | 	irmovq $63, %rdx		# src and dst have 63 elements
-0x014: 30f6d803000000000000 | 	irmovq dest, %rsi	# dst array
-0x01e: 30f7d001000000000000 | 	irmovq src, %rdi	# src array
+0x014: 30f68803000000000000 | 	irmovq dest, %rsi	# dst array
+0x01e: 30f77801000000000000 | 	irmovq src, %rdi	# src array
 0x028: 803200000000000000   | 	call ncopy		 
 0x031: 00                   | 	halt			# should halt with num nonzeros in %rax
 0x032:                      | StartFun:
@@ -30,7 +30,7 @@
                             | # You can modify this portion
                             | # Loop header
 0x032: 6300                 | xorq %rax,%rax		    # count = 0;
-0x034: 704701000000000000   | jmp Test_Unrolling
+0x034: 70f500000000000000   | jmp Test_Unrolling
                             | 
 0x03d:                      | Loop1:	
 0x03d: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
@@ -56,134 +56,130 @@
 0x0b8:                      | Loop4:	
 0x0b8: 50a71800000000000000 | mrmovq 24(%rdi), %r10	# read val from src...
 0x0c2: 40a61800000000000000 | rmmovq %r10, 24(%rsi)	# ...and store it to dst
-0x0cc: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x0ce: 71e100000000000000   | jle Loop5		        # if so, goto next loop
-0x0d7: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x0cc: c0f72000000000000000 | iaddq $32, %rdi
+0x0d6: c0f62000000000000000 | iaddq $32, %rsi
+0x0e0: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x0e2: 71f500000000000000   | jle Test_Unrolling		# if so, goto next Test_Unrolling
+0x0eb: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x0e1:                      | Loop5:	
-0x0e1: 50a72000000000000000 | mrmovq 32(%rdi), %r10	# read val from src...
-0x0eb: 40a62000000000000000 | rmmovq %r10, 32(%rsi)	# ...and store it to dst
-0x0f5: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x0f7: 710a01000000000000   | jle Loop6		        # if so, goto next loop
-0x100: c0f00100000000000000 | iaddq $1, %rax          # count++
-                            | 
-0x10a:                      | Loop6:	
-0x10a: 50a72800000000000000 | mrmovq 40(%rdi), %r10	# read val from src...
-0x114: 40a62800000000000000 | rmmovq %r10, 40(%rsi)	# ...and store it to dst
-0x11e: c0f73000000000000000 | iaddq $48, %rdi         # increment src
-0x128: c0f63000000000000000 | iaddq $48, %rsi         # increment dst
-0x132: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x134: 714701000000000000   | jle Test_Unrolling      # if so, goto next Test_Unrolling
-0x13d: c0f00100000000000000 | iaddq $1, %rax          # count++
-                            | 
-0x147:                      | Test_Unrolling:
-0x147: c0f2faffffffffffffff | iaddq $-6, %rdx         # len >= 6?
-0x151: 753d00000000000000   | jge Loop1
+0x0f5:                      | Test_Unrolling:
+0x0f5: c0f2fcffffffffffffff | iaddq $-4, %rdx         # len >= 4?
+0x0ff: 753d00000000000000   | jge Loop1
                             | 
                             | # Deal with remain data
-0x15a: c0f20600000000000000 | iaddq $6, %rdx          # add back %rdx
-0x164: 71c801000000000000   | jle Done                # if len <= 0, goto Done
+0x108: c0f20400000000000000 | iaddq $4, %rdx          # add back %rdx
+0x112: 717601000000000000   | jle Done                # if len <= 0, goto Done
                             | 
-0x16d:                      | Remain_Loop:
-0x16d: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
-0x177: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
-0x181: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x183: 719601000000000000   | jle Test		        # if so, skip counter increment
-0x18c: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x11b:                      | Remain_Loop:
+0x11b: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
+0x125: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
+0x12f: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x131: 714401000000000000   | jle Test		        # if so, skip counter increment
+0x13a: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x196:                      | Test:
-0x196: c0f2ffffffffffffffff | iaddq $-1, %rdx         # decrement %rdx
-0x1a0: 6222                 | andq %rdx,%rdx		    # len <= 0?
-0x1a2: 71c801000000000000   | jle Done		        # if so, goto Done:
-0x1ab: c0f70800000000000000 | iaddq $8, %rdi          # increment src
-0x1b5: c0f60800000000000000 | iaddq $8, %rsi          # increment dst
-0x1bf: 706d01000000000000   | jmp Remain_Loop
+0x144:                      | Test:
+0x144: c0f2ffffffffffffffff | iaddq $-1, %rdx         # decrement %rdx
+0x14e: 6222                 | andq %rdx,%rdx		    # len <= 0?
+0x150: 717601000000000000   | jle Done		        # if so, goto Done:
+0x159: c0f70800000000000000 | iaddq $8, %rdi          # increment src
+0x163: c0f60800000000000000 | iaddq $8, %rsi          # increment dst
+0x16d: 701b01000000000000   | jmp Remain_Loop
                             | 
                             | ##################################################################
                             | # Do not modify the following section of code
                             | # Function epilogue.
-0x1c8:                      | Done:
-0x1c8: 90                   | ret
+0x176:                      | Done:
+0x176: 90                   | ret
                             | ##################################################################
                             | # Keep the following label at the end of your function
-0x1c9:                      | End:
+0x177:                      | End:
                             | #/* $end ncopy-ys */
-0x1c9:                      | EndFun:
+0x177:                      | EndFun:
                             | 
                             | ###############################
                             | # Source and destination blocks 
                             | ###############################
-0x1d0:                      | 	.align 8
-0x1d0:                      | src:
-0x1d0: 0100000000000000     | 	.quad 1
-0x1d8: feffffffffffffff     | 	.quad -2
-0x1e0: fdffffffffffffff     | 	.quad -3
-0x1e8: 0400000000000000     | 	.quad 4
-0x1f0: fbffffffffffffff     | 	.quad -5
-0x1f8: 0600000000000000     | 	.quad 6
-0x200: f9ffffffffffffff     | 	.quad -7
-0x208: f8ffffffffffffff     | 	.quad -8
-0x210: 0900000000000000     | 	.quad 9
-0x218: 0a00000000000000     | 	.quad 10
-0x220: f5ffffffffffffff     | 	.quad -11
-0x228: 0c00000000000000     | 	.quad 12
-0x230: f3ffffffffffffff     | 	.quad -13
-0x238: f2ffffffffffffff     | 	.quad -14
-0x240: f1ffffffffffffff     | 	.quad -15
-0x248: f0ffffffffffffff     | 	.quad -16
-0x250: 1100000000000000     | 	.quad 17
-0x258: eeffffffffffffff     | 	.quad -18
-0x260: 1300000000000000     | 	.quad 19
-0x268: 1400000000000000     | 	.quad 20
-0x270: 1500000000000000     | 	.quad 21
-0x278: 1600000000000000     | 	.quad 22
-0x280: e9ffffffffffffff     | 	.quad -23
-0x288: e8ffffffffffffff     | 	.quad -24
-0x290: 1900000000000000     | 	.quad 25
-0x298: e6ffffffffffffff     | 	.quad -26
-0x2a0: e5ffffffffffffff     | 	.quad -27
-0x2a8: e4ffffffffffffff     | 	.quad -28
-0x2b0: e3ffffffffffffff     | 	.quad -29
-0x2b8: e2ffffffffffffff     | 	.quad -30
-0x2c0: e1ffffffffffffff     | 	.quad -31
-0x2c8: 2000000000000000     | 	.quad 32
-0x2d0: 2100000000000000     | 	.quad 33
-0x2d8: 2200000000000000     | 	.quad 34
-0x2e0: ddffffffffffffff     | 	.quad -35
-0x2e8: dcffffffffffffff     | 	.quad -36
-0x2f0: 2500000000000000     | 	.quad 37
-0x2f8: daffffffffffffff     | 	.quad -38
-0x300: d9ffffffffffffff     | 	.quad -39
-0x308: d8ffffffffffffff     | 	.quad -40
-0x310: d7ffffffffffffff     | 	.quad -41
-0x318: 2a00000000000000     | 	.quad 42
-0x320: 2b00000000000000     | 	.quad 43
-0x328: d4ffffffffffffff     | 	.quad -44
-0x330: 2d00000000000000     | 	.quad 45
-0x338: 2e00000000000000     | 	.quad 46
-0x340: d1ffffffffffffff     | 	.quad -47
-0x348: 3000000000000000     | 	.quad 48
-0x350: 3100000000000000     | 	.quad 49
-0x358: ceffffffffffffff     | 	.quad -50
-0x360: 3300000000000000     | 	.quad 51
-0x368: 3400000000000000     | 	.quad 52
-0x370: 3500000000000000     | 	.quad 53
-0x378: 3600000000000000     | 	.quad 54
-0x380: c9ffffffffffffff     | 	.quad -55
-0x388: c8ffffffffffffff     | 	.quad -56
-0x390: 3900000000000000     | 	.quad 57
-0x398: 3a00000000000000     | 	.quad 58
-0x3a0: c5ffffffffffffff     | 	.quad -59
-0x3a8: c4ffffffffffffff     | 	.quad -60
-0x3b0: 3d00000000000000     | 	.quad 61
-0x3b8: 3e00000000000000     | 	.quad 62
-0x3c0: 3f00000000000000     | 	.quad 63
-0x3c8: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
+0x178:                      | 	.align 8
+0x178:                      | src:
+0x178: 0100000000000000     | 	.quad 1
+0x180: feffffffffffffff     | 	.quad -2
+0x188: fdffffffffffffff     | 	.quad -3
+0x190: 0400000000000000     | 	.quad 4
+0x198: 0500000000000000     | 	.quad 5
+0x1a0: 0600000000000000     | 	.quad 6
+0x1a8: 0700000000000000     | 	.quad 7
+0x1b0: 0800000000000000     | 	.quad 8
+0x1b8: 0900000000000000     | 	.quad 9
+0x1c0: 0a00000000000000     | 	.quad 10
+0x1c8: 0b00000000000000     | 	.quad 11
+0x1d0: 0c00000000000000     | 	.quad 12
+0x1d8: f3ffffffffffffff     | 	.quad -13
+0x1e0: f2ffffffffffffff     | 	.quad -14
+0x1e8: f1ffffffffffffff     | 	.quad -15
+0x1f0: f0ffffffffffffff     | 	.quad -16
+0x1f8: 1100000000000000     | 	.quad 17
+0x200: eeffffffffffffff     | 	.quad -18
+0x208: edffffffffffffff     | 	.quad -19
+0x210: 1400000000000000     | 	.quad 20
+0x218: 1500000000000000     | 	.quad 21
+0x220: eaffffffffffffff     | 	.quad -22
+0x228: 1700000000000000     | 	.quad 23
+0x230: 1800000000000000     | 	.quad 24
+0x238: 1900000000000000     | 	.quad 25
+0x240: 1a00000000000000     | 	.quad 26
+0x248: 1b00000000000000     | 	.quad 27
+0x250: 1c00000000000000     | 	.quad 28
+0x258: 1d00000000000000     | 	.quad 29
+0x260: 1e00000000000000     | 	.quad 30
+0x268: e1ffffffffffffff     | 	.quad -31
+0x270: e0ffffffffffffff     | 	.quad -32
+0x278: dfffffffffffffff     | 	.quad -33
+0x280: 2200000000000000     | 	.quad 34
+0x288: ddffffffffffffff     | 	.quad -35
+0x290: dcffffffffffffff     | 	.quad -36
+0x298: dbffffffffffffff     | 	.quad -37
+0x2a0: daffffffffffffff     | 	.quad -38
+0x2a8: d9ffffffffffffff     | 	.quad -39
+0x2b0: 2800000000000000     | 	.quad 40
+0x2b8: d7ffffffffffffff     | 	.quad -41
+0x2c0: 2a00000000000000     | 	.quad 42
+0x2c8: d5ffffffffffffff     | 	.quad -43
+0x2d0: 2c00000000000000     | 	.quad 44
+0x2d8: d3ffffffffffffff     | 	.quad -45
+0x2e0: 2e00000000000000     | 	.quad 46
+0x2e8: d1ffffffffffffff     | 	.quad -47
+0x2f0: 3000000000000000     | 	.quad 48
+0x2f8: cfffffffffffffff     | 	.quad -49
+0x300: 3200000000000000     | 	.quad 50
+0x308: cdffffffffffffff     | 	.quad -51
+0x310: 3400000000000000     | 	.quad 52
+0x318: cbffffffffffffff     | 	.quad -53
+0x320: 3600000000000000     | 	.quad 54
+0x328: c9ffffffffffffff     | 	.quad -55
+0x330: c8ffffffffffffff     | 	.quad -56
+0x338: 3900000000000000     | 	.quad 57
+0x340: c6ffffffffffffff     | 	.quad -58
+0x348: c5ffffffffffffff     | 	.quad -59
+0x350: c4ffffffffffffff     | 	.quad -60
+0x358: c3ffffffffffffff     | 	.quad -61
+0x360: c2ffffffffffffff     | 	.quad -62
+0x368: c1ffffffffffffff     | 	.quad -63
+0x370: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
                             | 
-0x3d0:                      | 	.align 16
-0x3d0:                      | Predest:
-0x3d0: fadebc0000000000     | 	.quad 0xbcdefa
-0x3d8:                      | dest:
+0x380:                      | 	.align 16
+0x380:                      | Predest:
+0x380: fadebc0000000000     | 	.quad 0xbcdefa
+0x388:                      | dest:
+0x388: abefcd0000000000     | 	.quad 0xcdefab
+0x390: abefcd0000000000     | 	.quad 0xcdefab
+0x398: abefcd0000000000     | 	.quad 0xcdefab
+0x3a0: abefcd0000000000     | 	.quad 0xcdefab
+0x3a8: abefcd0000000000     | 	.quad 0xcdefab
+0x3b0: abefcd0000000000     | 	.quad 0xcdefab
+0x3b8: abefcd0000000000     | 	.quad 0xcdefab
+0x3c0: abefcd0000000000     | 	.quad 0xcdefab
+0x3c8: abefcd0000000000     | 	.quad 0xcdefab
+0x3d0: abefcd0000000000     | 	.quad 0xcdefab
 0x3d8: abefcd0000000000     | 	.quad 0xcdefab
 0x3e0: abefcd0000000000     | 	.quad 0xcdefab
 0x3e8: abefcd0000000000     | 	.quad 0xcdefab
@@ -237,36 +233,26 @@
 0x568: abefcd0000000000     | 	.quad 0xcdefab
 0x570: abefcd0000000000     | 	.quad 0xcdefab
 0x578: abefcd0000000000     | 	.quad 0xcdefab
-0x580: abefcd0000000000     | 	.quad 0xcdefab
-0x588: abefcd0000000000     | 	.quad 0xcdefab
-0x590: abefcd0000000000     | 	.quad 0xcdefab
-0x598: abefcd0000000000     | 	.quad 0xcdefab
-0x5a0: abefcd0000000000     | 	.quad 0xcdefab
-0x5a8: abefcd0000000000     | 	.quad 0xcdefab
-0x5b0: abefcd0000000000     | 	.quad 0xcdefab
-0x5b8: abefcd0000000000     | 	.quad 0xcdefab
-0x5c0: abefcd0000000000     | 	.quad 0xcdefab
-0x5c8: abefcd0000000000     | 	.quad 0xcdefab
-0x5d0:                      | Postdest:
-0x5d0: bcfade0000000000     | 	.quad 0xdefabc
+0x580:                      | Postdest:
+0x580: bcfade0000000000     | 	.quad 0xdefabc
                             | 
-0x5d8:                      | .align 8
+0x588:                      | .align 8
                             | # Run time stack
+0x588: 0000000000000000     | 	.quad 0
+0x590: 0000000000000000     | 	.quad 0
+0x598: 0000000000000000     | 	.quad 0
+0x5a0: 0000000000000000     | 	.quad 0
+0x5a8: 0000000000000000     | 	.quad 0
+0x5b0: 0000000000000000     | 	.quad 0
+0x5b8: 0000000000000000     | 	.quad 0
+0x5c0: 0000000000000000     | 	.quad 0
+0x5c8: 0000000000000000     | 	.quad 0
+0x5d0: 0000000000000000     | 	.quad 0
 0x5d8: 0000000000000000     | 	.quad 0
 0x5e0: 0000000000000000     | 	.quad 0
 0x5e8: 0000000000000000     | 	.quad 0
 0x5f0: 0000000000000000     | 	.quad 0
 0x5f8: 0000000000000000     | 	.quad 0
 0x600: 0000000000000000     | 	.quad 0
-0x608: 0000000000000000     | 	.quad 0
-0x610: 0000000000000000     | 	.quad 0
-0x618: 0000000000000000     | 	.quad 0
-0x620: 0000000000000000     | 	.quad 0
-0x628: 0000000000000000     | 	.quad 0
-0x630: 0000000000000000     | 	.quad 0
-0x638: 0000000000000000     | 	.quad 0
-0x640: 0000000000000000     | 	.quad 0
-0x648: 0000000000000000     | 	.quad 0
-0x650: 0000000000000000     | 	.quad 0
                             | 
-0x658:                      | Stack:
+0x608:                      | Stack:
