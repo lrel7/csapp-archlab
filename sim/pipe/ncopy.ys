@@ -15,27 +15,82 @@ ncopy:
 
 ##################################################################
 # You can modify this portion
-	# Loop header
-	xorq %rax,%rax		# count = 0;
-	andq %rdx,%rdx		# len <= 0?
-	jle Done		# if so, goto Done:
+# Loop header
+xorq %rax,%rax		    # count = 0;
 
-Loop:	mrmovq (%rdi), %r10	# read val from src...
-	rmmovq %r10, (%rsi)	# ...and store it to dst
-	andq %r10, %r10		# val <= 0?
-	jle Npos		# if so, goto Npos:
-	iaddq $1, %rax  # count++
-Npos:	# irmovq $1, %r10
-	iaddq $-1, %rdx  # len--
-	iaddq $8, %rdi  # src++
-	iaddq $8, %rsi  # dst++
-	andq %rdx,%rdx		# len > 0?
-	jg Loop			# if so, goto Loop:
+Main_Loop:
+iaddq $-6, %rdx         # len < 6?
+jl Remain               # if so, goto Remain:
+
+Loop1:	
+mrmovq (%rdi), %r10	    # read val from src...
+rmmovq %r10, (%rsi)	    # ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Loop2		        # if so, goto next loop
+iaddq $1, %rax          # count++
+
+Loop2:	
+mrmovq 8(%rdi), %r10	# read val from src...
+rmmovq %r10, 8(%rsi)	# ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Loop3		        # if so, goto next loop
+iaddq $1, %rax          # count++
+
+Loop3:	
+mrmovq 16(%rdi), %r10	# read val from src...
+rmmovq %r10, 16(%rsi)	# ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Loop4		        # if so, goto next loop
+iaddq $1, %rax          # count++
+
+Loop4:	
+mrmovq 24(%rdi), %r10	# read val from src...
+rmmovq %r10, 24(%rsi)	# ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Loop5		        # if so, goto next loop
+iaddq $1, %rax          # count++
+
+Loop5:	
+mrmovq 32(%rdi), %r10	# read val from src...
+rmmovq %r10, 32(%rsi)	# ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Loop6		        # if so, goto next loop
+iaddq $1, %rax          # count++
+
+Loop6:	
+mrmovq 40(%rdi), %r10	# read val from src...
+rmmovq %r10, 40(%rsi)	# ...and store it to dst
+iaddq $48, %rdi         # increment src
+iaddq $48, %rsi         # increment dst
+andq %r10, %r10		    # val <= 0?
+jle Main_Loop		    # if so, goto next loop
+iaddq $1, %rax          # count++
+jmp Main_Loop
+
+Remain:
+iaddq $6, %rdx          # add back %rdx
+jle Done                # if len <= 0, goto Done
+
+Remain_Loop:
+mrmovq (%rdi), %r10	    # read val from src...
+rmmovq %r10, (%rsi)	    # ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Test		        # if so, skip counter increment
+iaddq $1, %rax          # count++
+
+Test:
+iaddq $-1, %rdx         # decrement %rdx
+andq %rdx,%rdx		    # len <= 0?
+jle Done		        # if so, goto Done:
+iaddq $8, %rdi          # increment src
+iaddq $8, %rsi          # increment dst
+jmp Remain_Loop
+
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
 Done:
-	ret
+ret
 ##################################################################
 # Keep the following label at the end of your function
 End:
