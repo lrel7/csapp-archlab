@@ -7,7 +7,7 @@
                             | 	# Set up arguments for copy function and then invoke it
 0x00a: 30f20400000000000000 | 	irmovq $4, %rdx		# src and dst have 4 elements
 0x014: 30f60802000000000000 | 	irmovq dest, %rsi	# dst array
-0x01e: 30f7d801000000000000 | 	irmovq src, %rdi	# src array
+0x01e: 30f7d001000000000000 | 	irmovq src, %rdi	# src array
 0x028: 803200000000000000   | 	call ncopy		 
 0x031: 00                   | 	halt			# should halt with num nonzeros in %rax
 0x032:                      | StartFun:
@@ -67,60 +67,65 @@
 0x0ff: 753d00000000000000   | jge Loop1
                             | 
                             | # Deal with remain data
-0x108: c0f20400000000000000 | iaddq $4, %rdx          # add back %rdx
-0x112: 71d101000000000000   | jle Done                # if len <= 0, goto Done
-0x11b: c0f2feffffffffffffff | iaddq $-2, %rdx         # len < 2 (len == 1)?
-0x125: 729f01000000000000   | jl One
+                            | # iaddq $4, %rdx          # add back %rdx
+                            | # jle Done                # if len <= 0, goto Done
+                            | # iaddq $-2, %rdx         # len < 2 (len == 1)?
+                            | # jl One
+0x108: c0f20300000000000000 | iaddq $3, %rdx          # now %rdx = len - 1
+0x112: 739d01000000000000   | je One
+0x11b: 72cf01000000000000   | jl Done
                             | 
-0x12e:                      | Unroll1:
-0x12e: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
-0x138: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
-0x142: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x144: 715701000000000000   | jle Unroll2		        # if so, skip counter increment
-0x14d: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x124:                      | Unroll1:
+0x124: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
+0x12e: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
+0x138: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x13a: 714d01000000000000   | jle Unroll2		        # if so, skip counter increment
+0x143: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x157:                      | Unroll2:
-0x157: 50a70800000000000000 | mrmovq 8(%rdi), %r10
-0x161: 40a60800000000000000 | rmmovq %r10, 8(%rsi)
-0x16b: c0f71000000000000000 | iaddq $16, %rdi
-0x175: c0f61000000000000000 | iaddq $16, %rsi
-0x17f: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x181: 719401000000000000   | jle Test1		        # if so, skip counter increment
-0x18a: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x14d:                      | Unroll2:
+0x14d: 50a70800000000000000 | mrmovq 8(%rdi), %r10
+0x157: 40a60800000000000000 | rmmovq %r10, 8(%rsi)
+0x161: c0f71000000000000000 | iaddq $16, %rdi
+0x16b: c0f61000000000000000 | iaddq $16, %rsi
+0x175: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x177: 718a01000000000000   | jle Test1		        # if so, skip counter increment
+0x180: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x194:                      | Test1:
-0x194: 6222                 | andq %rdx, %rdx         # len <= 0?
-0x196: 71d101000000000000   | jle Done
+0x18a:                      | Test1:
+                            | # andq %rdx, %rdx         # len <= 0?
+                            | # jle Done
+0x18a: c0f2feffffffffffffff | iaddq $-2, %rdx         # len - 1 < 2 ? (len == 2)
+0x194: 72cf01000000000000   | jl Done
                             | 
-0x19f:                      | One:
-0x19f: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
-0x1a9: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
-0x1b3: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x1b5: 71d101000000000000   | jle Done		        # if so, skip counter increment
-0x1be: c0f00100000000000000 | iaddq $1, %rax          # count++
-0x1c8: 70d101000000000000   | jmp Done
+0x19d:                      | One:
+0x19d: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
+0x1a7: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
+0x1b1: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x1b3: 71cf01000000000000   | jle Done		        # if so, skip counter increment
+0x1bc: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x1c6: 70cf01000000000000   | jmp Done
                             | 
                             | ##################################################################
                             | # Do not modify the following section of code
                             | # Function epilogue.
-0x1d1:                      | Done:
-0x1d1: 90                   | ret
+0x1cf:                      | Done:
+0x1cf: 90                   | ret
                             | ##################################################################
                             | # Keep the following label at the end of your function
-0x1d2:                      | End:
+0x1d0:                      | End:
                             | #/* $end ncopy-ys */
-0x1d2:                      | EndFun:
+0x1d0:                      | EndFun:
                             | 
                             | ###############################
                             | # Source and destination blocks 
                             | ###############################
-0x1d8:                      | 	.align 8
-0x1d8:                      | src:
-0x1d8: 0100000000000000     | 	.quad 1
-0x1e0: feffffffffffffff     | 	.quad -2
-0x1e8: fdffffffffffffff     | 	.quad -3
-0x1f0: 0400000000000000     | 	.quad 4
-0x1f8: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
+0x1d0:                      | 	.align 8
+0x1d0:                      | src:
+0x1d0: 0100000000000000     | 	.quad 1
+0x1d8: feffffffffffffff     | 	.quad -2
+0x1e0: 0300000000000000     | 	.quad 3
+0x1e8: fcffffffffffffff     | 	.quad -4
+0x1f0: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
                             | 
 0x200:                      | 	.align 16
 0x200:                      | Predest:

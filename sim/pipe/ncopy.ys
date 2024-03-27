@@ -54,10 +54,13 @@ iaddq $-4, %rdx         # len >= 4?
 jge Loop1
 
 # Deal with remain data
-iaddq $4, %rdx          # add back %rdx
-jle Done                # if len <= 0, goto Done
-iaddq $-2, %rdx         # len < 2 (len == 1)?
-jl One
+# iaddq $4, %rdx          # add back %rdx
+# jle Done                # if len <= 0, goto Done
+# iaddq $-2, %rdx         # len < 2 (len == 1)?
+# jl One
+iaddq $3, %rdx          # now %rdx = len - 1
+je One
+jl Done
 
 Unroll1:
 mrmovq (%rdi), %r10	    # read val from src...
@@ -76,8 +79,10 @@ jle Test1		        # if so, skip counter increment
 iaddq $1, %rax          # count++
 
 Test1:
-andq %rdx, %rdx         # len <= 0?
-jle Done
+# andq %rdx, %rdx         # len <= 0?
+# jle Done
+iaddq $-2, %rdx         # len - 1 < 2 ? (len == 2)
+jl Done
 
 One:
 mrmovq (%rdi), %r10	    # read val from src...
