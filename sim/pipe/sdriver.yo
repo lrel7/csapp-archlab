@@ -30,57 +30,57 @@
                             | # You can modify this portion
                             | # Loop header
 0x032: 6300                 | xorq %rax,%rax		    # count = 0;
+0x034: 704701000000000000   | jmp Test_Unrolling
                             | 
-0x034:                      | Main_Loop:
-0x034: c0f2faffffffffffffff | iaddq $-6, %rdx         # len < 6?
-0x03e: 725a01000000000000   | jl Remain               # if so, goto Remain:
+0x03d:                      | Loop1:	
+0x03d: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
+0x047: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
+0x051: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x053: 716600000000000000   | jle Loop2		        # if so, goto next loop
+0x05c: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x047:                      | Loop1:	
-0x047: 50a70000000000000000 | mrmovq (%rdi), %r10	    # read val from src...
-0x051: 40a60000000000000000 | rmmovq %r10, (%rsi)	    # ...and store it to dst
-0x05b: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x05d: 717000000000000000   | jle Loop2		        # if so, goto next loop
-0x066: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x066:                      | Loop2:	
+0x066: 50a70800000000000000 | mrmovq 8(%rdi), %r10	# read val from src...
+0x070: 40a60800000000000000 | rmmovq %r10, 8(%rsi)	# ...and store it to dst
+0x07a: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x07c: 718f00000000000000   | jle Loop3		        # if so, goto next loop
+0x085: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x070:                      | Loop2:	
-0x070: 50a70800000000000000 | mrmovq 8(%rdi), %r10	# read val from src...
-0x07a: 40a60800000000000000 | rmmovq %r10, 8(%rsi)	# ...and store it to dst
-0x084: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x086: 719900000000000000   | jle Loop3		        # if so, goto next loop
-0x08f: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x08f:                      | Loop3:	
+0x08f: 50a71000000000000000 | mrmovq 16(%rdi), %r10	# read val from src...
+0x099: 40a61000000000000000 | rmmovq %r10, 16(%rsi)	# ...and store it to dst
+0x0a3: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x0a5: 71b800000000000000   | jle Loop4		        # if so, goto next loop
+0x0ae: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x099:                      | Loop3:	
-0x099: 50a71000000000000000 | mrmovq 16(%rdi), %r10	# read val from src...
-0x0a3: 40a61000000000000000 | rmmovq %r10, 16(%rsi)	# ...and store it to dst
-0x0ad: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x0af: 71c200000000000000   | jle Loop4		        # if so, goto next loop
-0x0b8: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x0b8:                      | Loop4:	
+0x0b8: 50a71800000000000000 | mrmovq 24(%rdi), %r10	# read val from src...
+0x0c2: 40a61800000000000000 | rmmovq %r10, 24(%rsi)	# ...and store it to dst
+0x0cc: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x0ce: 71e100000000000000   | jle Loop5		        # if so, goto next loop
+0x0d7: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x0c2:                      | Loop4:	
-0x0c2: 50a71800000000000000 | mrmovq 24(%rdi), %r10	# read val from src...
-0x0cc: 40a61800000000000000 | rmmovq %r10, 24(%rsi)	# ...and store it to dst
-0x0d6: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x0d8: 71eb00000000000000   | jle Loop5		        # if so, goto next loop
-0x0e1: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x0e1:                      | Loop5:	
+0x0e1: 50a72000000000000000 | mrmovq 32(%rdi), %r10	# read val from src...
+0x0eb: 40a62000000000000000 | rmmovq %r10, 32(%rsi)	# ...and store it to dst
+0x0f5: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x0f7: 710a01000000000000   | jle Loop6		        # if so, goto next loop
+0x100: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x0eb:                      | Loop5:	
-0x0eb: 50a72000000000000000 | mrmovq 32(%rdi), %r10	# read val from src...
-0x0f5: 40a62000000000000000 | rmmovq %r10, 32(%rsi)	# ...and store it to dst
-0x0ff: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x101: 711401000000000000   | jle Loop6		        # if so, goto next loop
-0x10a: c0f00100000000000000 | iaddq $1, %rax          # count++
+0x10a:                      | Loop6:	
+0x10a: 50a72800000000000000 | mrmovq 40(%rdi), %r10	# read val from src...
+0x114: 40a62800000000000000 | rmmovq %r10, 40(%rsi)	# ...and store it to dst
+0x11e: c0f73000000000000000 | iaddq $48, %rdi         # increment src
+0x128: c0f63000000000000000 | iaddq $48, %rsi         # increment dst
+0x132: 62aa                 | andq %r10, %r10		    # val <= 0?
+0x134: 714701000000000000   | jle Test_Unrolling      # if so, goto next Test_Unrolling
+0x13d: c0f00100000000000000 | iaddq $1, %rax          # count++
                             | 
-0x114:                      | Loop6:	
-0x114: 50a72800000000000000 | mrmovq 40(%rdi), %r10	# read val from src...
-0x11e: 40a62800000000000000 | rmmovq %r10, 40(%rsi)	# ...and store it to dst
-0x128: c0f73000000000000000 | iaddq $48, %rdi         # increment src
-0x132: c0f63000000000000000 | iaddq $48, %rsi         # increment dst
-0x13c: 62aa                 | andq %r10, %r10		    # val <= 0?
-0x13e: 713400000000000000   | jle Main_Loop		    # if so, goto next loop
-0x147: c0f00100000000000000 | iaddq $1, %rax          # count++
-0x151: 703400000000000000   | jmp Main_Loop
+0x147:                      | Test_Unrolling:
+0x147: c0f2faffffffffffffff | iaddq $-6, %rdx         # len >= 6?
+0x151: 753d00000000000000   | jge Loop1
                             | 
-0x15a:                      | Remain:
+                            | # Deal with remain data
 0x15a: c0f20600000000000000 | iaddq $6, %rdx          # add back %rdx
 0x164: 71c801000000000000   | jle Done                # if len <= 0, goto Done
                             | 
@@ -115,10 +115,10 @@
                             | ###############################
 0x1d0:                      | 	.align 8
 0x1d0:                      | src:
-0x1d0: 0100000000000000     | 	.quad 1
-0x1d8: 0200000000000000     | 	.quad 2
-0x1e0: fdffffffffffffff     | 	.quad -3
-0x1e8: fcffffffffffffff     | 	.quad -4
+0x1d0: ffffffffffffffff     | 	.quad -1
+0x1d8: feffffffffffffff     | 	.quad -2
+0x1e0: 0300000000000000     | 	.quad 3
+0x1e8: 0400000000000000     | 	.quad 4
 0x1f0: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
                             | 
 0x200:                      | 	.align 16

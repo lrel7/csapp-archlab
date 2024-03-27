@@ -17,10 +17,7 @@ ncopy:
 # You can modify this portion
 # Loop header
 xorq %rax,%rax		    # count = 0;
-
-Main_Loop:
-iaddq $-6, %rdx         # len < 6?
-jl Remain               # if so, goto Remain:
+jmp Test_Unrolling
 
 Loop1:	
 mrmovq (%rdi), %r10	    # read val from src...
@@ -63,11 +60,14 @@ rmmovq %r10, 40(%rsi)	# ...and store it to dst
 iaddq $48, %rdi         # increment src
 iaddq $48, %rsi         # increment dst
 andq %r10, %r10		    # val <= 0?
-jle Main_Loop		    # if so, goto next loop
+jle Test_Unrolling      # if so, goto next Test_Unrolling
 iaddq $1, %rax          # count++
-jmp Main_Loop
 
-Remain:
+Test_Unrolling:
+iaddq $-6, %rdx         # len >= 6?
+jge Loop1
+
+# Deal with remain data
 iaddq $6, %rdx          # add back %rdx
 jle Done                # if len <= 0, goto Done
 
