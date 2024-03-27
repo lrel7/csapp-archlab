@@ -57,23 +57,37 @@ jge Loop1
 iaddq $4, %rdx          # add back %rdx
 jle Done                # if len <= 0, goto Done
 
-Remain_Loop:
-iaddq $-2, %rdx         # len < 2?
-jle 
+Remain:
+iaddq $-2, %rdx         # len < 2 (len == 1)?
+jle One
 
 Unroll1:
 mrmovq (%rdi), %r10	    # read val from src...
 rmmovq %r10, (%rsi)	    # ...and store it to dst
 andq %r10, %r10		    # val <= 0?
-jle Unroll1		        # if so, skip counter increment
+jle Unroll2		        # if so, skip counter increment
 iaddq $1, %rax          # count++
 
 Unroll2:
 mrmovq 8(%rdi), %r10
 rmmovq %r10, 8(%rsi)
+iaddq $16, %rdi
+iaddq $16, %rsi
 andq %r10, %r10		    # val <= 0?
-jle Unroll1		        # if so, skip counter increment
+jle Test1		        # if so, skip counter increment
 iaddq $1, %rax          # count++
+
+Test1:
+andq %rdx, %rdx         # len <= 0?
+jle Done
+
+One:
+mrmovq (%rdi), %r10	    # read val from src...
+rmmovq %r10, (%rsi)	    # ...and store it to dst
+andq %r10, %r10		    # val <= 0?
+jle Done		        # if so, skip counter increment
+iaddq $1, %rax          # count++
+jmp Done
 
 Test:
 iaddq $-1, %rdx         # decrement %rdx
@@ -81,7 +95,7 @@ andq %rdx,%rdx		    # len <= 0?
 jle Done		        # if so, goto Done:
 iaddq $8, %rdi          # increment src
 iaddq $8, %rsi          # increment dst
-jmp Remain_Loop
+jmp Remain
 
 ##################################################################
 # Do not modify the following section of code
