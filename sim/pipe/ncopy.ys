@@ -58,10 +58,21 @@ iaddq $4, %rdx          # add back %rdx
 jle Done                # if len <= 0, goto Done
 
 Remain_Loop:
+iaddq $-2, %rdx         # len < 2?
+jle 
+
+Unroll1:
 mrmovq (%rdi), %r10	    # read val from src...
 rmmovq %r10, (%rsi)	    # ...and store it to dst
 andq %r10, %r10		    # val <= 0?
-jle Test		        # if so, skip counter increment
+jle Unroll1		        # if so, skip counter increment
+iaddq $1, %rax          # count++
+
+Unroll2:
+mrmovq 8(%rdi), %r10
+rmmovq %r10, 8(%rsi)
+andq %r10, %r10		    # val <= 0?
+jle Unroll1		        # if so, skip counter increment
 iaddq $1, %rax          # count++
 
 Test:
