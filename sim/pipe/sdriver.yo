@@ -100,7 +100,6 @@
 0x1ad: 754700000000000000   | jge Unroll              # if so, keep unrolling
                             | 
                             | # Deal with remaining data
-                            | # %rdx may be -7 ~ -1
 0x1b6:                      | Remain:
 0x1b6: c0f20800000000000000 | iaddq $8, %rdx          # now %rdx = len
 0x1c0: 735a03000000000000   | je Done                 # if len == 0, done
@@ -182,8 +181,8 @@
                             | ###############################
 0x360:                      | 	.align 8
 0x360:                      | src:
-0x360: ffffffffffffffff     | 	.quad -1
-0x368: 0200000000000000     | 	.quad 2
+0x360: 0100000000000000     | 	.quad 1
+0x368: feffffffffffffff     | 	.quad -2
 0x370: fdffffffffffffff     | 	.quad -3
 0x378: 0400000000000000     | 	.quad 4
 0x380: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
