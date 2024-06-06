@@ -106,34 +106,28 @@ Remain:
 iaddq $4, %rdx          # %rdx == -4? 
 jl Node_6               # if %rdx < -4, goto Node_6
 jg Node_2               # if %rdx > -4, goto Node_2
-mrmovq 24(%rdi), %r11   # prepare for Remain_4
 jmp Remain_4            # goto Remain_4
 
 Node_6:
 iaddq $2, %rdx          # %rdx == -6?
 jl Node_7               # if %rdx < -6 (== -7), goto Node_7
 jg Node_5               # if %rdx > -6 (== -5), goto Node_5
-mrmovq 8(%rdi), %r9     # prepare for Remain_2
 jmp Remain_2
 
 Node_7:
 iaddq $1, %rdx          # %rdx == -7?
 jl Done                 # if %rdx < -7 (== -8), goto Done
-mrmovq (%rdi), %r8      # prepare for Remain_1
 jmp Remain_1
 
 Node_5:
-mrmovq 16(%rdi), %r10   # prepare for Remain_3
 jmp Remain_3
 
 Node_3:
-mrmovq 32(%rdi), %r12   # prepare for Remain_5
 jmp Remain_5
 
 Node_2:
 iaddq $-2, %rdx         # %rdx == -2?
 jl Node_3               # if %rdx < -2 (== -3), goto Node_3
-mrmovq 40(%rdi), %r13   # prepare for Remain_6
 je Remain_6             # if %rdx == -2, goto Remain_6
                         # else, %rdx == -1, goto Remain_7
 
@@ -203,68 +197,68 @@ EndFun:
 	.align 8
 src:
 	.quad 1
-	.quad -2
-	.quad -3
+	.quad 2
+	.quad 3
 	.quad 4
-	.quad -5
+	.quad 5
 	.quad 6
 	.quad -7
 	.quad -8
-	.quad -9
-	.quad 10
+	.quad 9
+	.quad -10
 	.quad 11
 	.quad 12
 	.quad -13
 	.quad -14
-	.quad 15
-	.quad -16
-	.quad -17
-	.quad -18
+	.quad -15
+	.quad 16
+	.quad 17
+	.quad 18
 	.quad 19
 	.quad -20
 	.quad -21
-	.quad -22
+	.quad 22
 	.quad 23
-	.quad -24
-	.quad -25
+	.quad 24
+	.quad 25
 	.quad -26
 	.quad -27
 	.quad 28
 	.quad -29
 	.quad -30
-	.quad -31
-	.quad 32
+	.quad 31
+	.quad -32
 	.quad -33
-	.quad 34
+	.quad -34
 	.quad -35
-	.quad 36
+	.quad -36
 	.quad 37
-	.quad -38
-	.quad 39
+	.quad 38
+	.quad -39
 	.quad -40
 	.quad -41
-	.quad 42
-	.quad -43
+	.quad -42
+	.quad 43
 	.quad -44
 	.quad -45
 	.quad -46
-	.quad -47
-	.quad -48
-	.quad 49
+	.quad 47
+	.quad 48
+	.quad -49
 	.quad 50
 	.quad 51
 	.quad 52
-	.quad 53
+	.quad -53
 	.quad 54
 	.quad 55
-	.quad 56
+	.quad -56
 	.quad 57
 	.quad 58
-	.quad 59
-	.quad 60
-	.quad 61
-	.quad 62
-	.quad 63
+	.quad -59
+	.quad -60
+	.quad -61
+	.quad -62
+	.quad -63
 	.quad 0xbcdefa # This shouldn't get moved
 
 	.align 16
