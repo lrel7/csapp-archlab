@@ -18,7 +18,7 @@ ncopy:
 
 ##################################################################
 # You can modify this portion
-xorq %rax, %rax		        # count = 0;
+# xorq %rax, %rax		        # count = 0;
 iaddq $-8, %rdx             # %rdx < 8?
 jl Remain                   # if so, goto Remain
 
