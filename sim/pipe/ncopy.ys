@@ -91,32 +91,24 @@ jge Unroll              # if so, keep unrolling
 # BST judge
 Remain:
 iaddq $4, %rdx          # %rdx == -4? 
-jl Node_6               # if %rdx < -4, goto Node_6
-jg Node_2               # if %rdx > -4, goto Node_2
-jmp Remain_4            # goto Remain_4
+jl Remain_0_to_3        # if %rdx < -4
+je Remain_4
 
-Node_6:
-iaddq $2, %rdx          # %rdx == -6?
-jl Node_7               # if %rdx < -6 (== -7), goto Node_7
-jg Node_5               # if %rdx > -6 (== -5), goto Node_5
-jmp Remain_2
+iaddq $-2, %rdx         # if %rdx == -2?
+jl Remain_5             # if %rdx < -2, then %rdx == -3
+je Remain_6
+jmp Remain_7
 
-Node_7:
-iaddq $1, %rdx          # %rdx == -7?
-jl Done                 # if %rdx < -7 (== -8), goto Done
-jmp Remain_1
-
-Node_5:
+Remain_0_to_3:
+iaddq $2, %rdx          # if %rdx == -6?
+jl Remain_0_to_1        # if %rdx < -6
+je Remain_2
 jmp Remain_3
 
-Node_3:
-jmp Remain_5
-
-Node_2:
-iaddq $-2, %rdx         # %rdx == -2?
-jl Node_3               # if %rdx < -2 (== -3), goto Node_3
-je Remain_6             # if %rdx == -2, goto Remain_6
-                        # else, %rdx == -1, goto Remain_7
+Remain_0_to_1:
+iaddq $1, %rdx          # if %rdx == -7?
+je Remain_1
+ret
 
 Remain_7:
 mrmovq 48(%rdi), %r14   # read

@@ -104,32 +104,24 @@ jge Unroll              # if so, keep unrolling
 # BST judge
 Remain:
 iaddq $4, %rdx          # %rdx == -4? 
-jl Node_6               # if %rdx < -4, goto Node_6
-jg Node_2               # if %rdx > -4, goto Node_2
-jmp Remain_4            # goto Remain_4
+jl Remain_0_to_3        # if %rdx < -4
+je Remain_4
 
-Node_6:
-iaddq $2, %rdx          # %rdx == -6?
-jl Node_7               # if %rdx < -6 (== -7), goto Node_7
-jg Node_5               # if %rdx > -6 (== -5), goto Node_5
-jmp Remain_2
+iaddq $-2, %rdx         # if %rdx == -2?
+jl Remain_5             # if %rdx < -2, then %rdx == -3
+je Remain_6
+jmp Remain_7
 
-Node_7:
-iaddq $1, %rdx          # %rdx == -7?
-jl Done                 # if %rdx < -7 (== -8), goto Done
-jmp Remain_1
-
-Node_5:
+Remain_0_to_3:
+iaddq $2, %rdx          # if %rdx == -6?
+jl Remain_0_to_1        # if %rdx < -6
+je Remain_2
 jmp Remain_3
 
-Node_3:
-jmp Remain_5
-
-Node_2:
-iaddq $-2, %rdx         # %rdx == -2?
-jl Node_3               # if %rdx < -2 (== -3), goto Node_3
-je Remain_6             # if %rdx == -2, goto Remain_6
-                        # else, %rdx == -1, goto Remain_7
+Remain_0_to_1:
+iaddq $1, %rdx          # if %rdx == -7?
+je Remain_1
+ret
 
 Remain_7:
 mrmovq 48(%rdi), %r14   # read
@@ -196,69 +188,69 @@ EndFun:
 ###############################
 	.align 8
 src:
-	.quad 1
+	.quad -1
 	.quad 2
 	.quad 3
 	.quad 4
-	.quad 5
-	.quad 6
-	.quad -7
+	.quad -5
+	.quad -6
+	.quad 7
 	.quad -8
-	.quad 9
-	.quad -10
-	.quad 11
+	.quad -9
+	.quad 10
+	.quad -11
 	.quad 12
 	.quad -13
 	.quad -14
 	.quad -15
-	.quad 16
-	.quad 17
-	.quad 18
+	.quad -16
+	.quad -17
+	.quad -18
 	.quad 19
 	.quad -20
 	.quad -21
-	.quad 22
-	.quad 23
-	.quad 24
+	.quad -22
+	.quad -23
+	.quad -24
 	.quad 25
 	.quad -26
 	.quad -27
-	.quad 28
+	.quad -28
 	.quad -29
 	.quad -30
-	.quad 31
+	.quad -31
 	.quad -32
 	.quad -33
-	.quad -34
+	.quad 34
 	.quad -35
-	.quad -36
+	.quad 36
 	.quad 37
-	.quad 38
+	.quad -38
 	.quad -39
 	.quad -40
-	.quad -41
+	.quad 41
 	.quad -42
 	.quad 43
 	.quad -44
 	.quad -45
-	.quad -46
+	.quad 46
 	.quad 47
 	.quad 48
-	.quad -49
+	.quad 49
 	.quad 50
 	.quad 51
 	.quad 52
-	.quad -53
+	.quad 53
 	.quad 54
 	.quad 55
-	.quad -56
+	.quad 56
 	.quad 57
 	.quad 58
-	.quad -59
-	.quad -60
-	.quad -61
-	.quad -62
-	.quad -63
+	.quad 59
+	.quad 60
+	.quad 61
+	.quad 62
+	.quad 63
 	.quad 0xbcdefa # This shouldn't get moved
 
 	.align 16
